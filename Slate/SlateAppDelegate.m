@@ -522,16 +522,18 @@ OSStatus OnModifiersChangedEvent(EventHandlerCallRef nextHandler, EventRef theEv
 
   // Check if Accessibility API is enabled
   if (!AXAPIEnabled()) {
-    NSAlert *alert = [SlateConfig warningAlertWithKeyEquivalents: [NSArray arrayWithObjects:@"Enable", @"Quit", nil]];
+    NSAlert *alert = [SlateConfig warningAlertWithKeyEquivalents: [NSArray arrayWithObjects:@"Open System Preferences", @"Quit", nil]];
     [alert setMessageText:[NSString stringWithFormat:@"Slate cannot run without \"Access for assistive devices\". Would you like to enable it?"]];
     [alert setInformativeText:[NSString stringWithFormat:@"You may be prompted for your administrator password."]];
     [alert setAlertStyle:NSCriticalAlertStyle];
     NSInteger alertIndex = [alert runModal];
     if (alertIndex == NSAlertFirstButtonReturn) {
       SlateLogger(@"User wants to enable Access for assistive devices");
-      NSDictionary* errorDictionary;
-      NSAppleScript* applescript = [[NSAppleScript alloc] initWithSource:@"tell application \"System Events\" to set UI elements enabled to true"];
-      [applescript executeAndReturnError:&errorDictionary];
+      [[NSWorkspace sharedWorkspace] openURL:
+       [NSURL fileURLWithPath:@"/System/Library/PreferencePanes/Security.prefPane"]];
+      NSString* src = @"tell application \"System Preferences\"\nreveal anchor \"Privacy\" of pane id \"com.apple.preference.security\"\nend tell";
+      NSAppleScript *a = [[NSAppleScript alloc] initWithSource:src];
+      [a executeAndReturnError:nil];
     }
     else if (alertIndex == NSAlertSecondButtonReturn) {
       SlateLogger(@"User selected quit");
