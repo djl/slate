@@ -90,7 +90,7 @@ static EventHandlerRef modifiersEvent;
 - (void)loadConfig {
   [self setHasUndoOperation:NO];
   [[SlateConfig getInstance] load];
-  [self hideMenuBarIconIfNecessary];
+  [self showMenuBarIconIfNecessary];
 }
 
 - (void)registerHotKeys {
@@ -169,13 +169,18 @@ static EventHandlerRef modifiersEvent;
   }
 }
 
-- (IBAction)hideMenuBarIcon {
-  [[NSStatusBar systemStatusBar] removeStatusItem:statusItem];
+- (IBAction)showMenuBarIcon {
+  statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength: NSVariableStatusItemLength];
+  [statusItem setMenu:statusMenu];
+  NSImage *statusImage = [NSImage imageNamed:@"status"];
+  [statusImage setTemplate:YES];
+  [statusItem setImage:statusImage];
+  [statusItem setHighlightMode:YES];
 }
 
-- (void)hideMenuBarIconIfNecessary {
+- (void)showMenuBarIconIfNecessary {
   BOOL menuBarIconHidden = [[SlateConfig getInstance] getBoolConfig:MENU_BAR_ICON_HIDDEN];
-  if (menuBarIconHidden) [self hideMenuBarIcon];
+  if (!menuBarIconHidden) [self showMenuBarIcon];
 }
 
 - (OSStatus)timerActivateBinding:(NSTimer *)timer {
@@ -499,21 +504,11 @@ OSStatus OnModifiersChangedEvent(EventHandlerCallRef nextHandler, EventRef theEv
   NSMenuItem *loadConfigItem = [statusMenu insertItemWithTitle:@"Relaunch and Load Config" action:@selector(relaunch) keyEquivalent:@"" atIndex:0];
   [loadConfigItem setTarget:self];
   
-  NSMenuItem *hideItem = [statusMenu insertItemWithTitle:@"Hide Menu Bar Icon" action:@selector(hideMenuBarIcon) keyEquivalent:@"" atIndex:0];
-  [hideItem setTarget:self];
-  
   NSMenuItem *aboutItem = [statusMenu insertItemWithTitle:@"About Slate" action:@selector(aboutWindow) keyEquivalent:@"" atIndex:0];
   [aboutItem setTarget:self];
 
   //NSMenuItem *configInfoItem = [statusMenu insertItemWithTitle:@"Configuration Helper" action:@selector(configurationHelper) keyEquivalent:@"" atIndex:2];
   //[configInfoItem setTarget:self];
-
-  statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength: NSVariableStatusItemLength];
-  [statusItem setMenu:statusMenu];
-  NSImage *statusImage = [NSImage imageNamed:@"status"];
-  [statusImage setTemplate:YES];
-  [statusItem setImage:statusImage];
-  [statusItem setHighlightMode:YES];
 
   // Ensure no timer exists
   @synchronized(timerLock) {

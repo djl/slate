@@ -77,7 +77,7 @@
 - (IBAction)currentWindowInfo;
 - (IBAction)configurationHelper;
 - (IBAction)aboutWindow;
-- (IBAction)hideMenuBarIcon;
+- (IBAction)showMenuBarIcon;
 - (void)loadConfig;
 - (void)registerHotKeys;
 - (void)createSnapshotOperations;
